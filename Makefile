@@ -1,6 +1,6 @@
 NAME = fractol
 
-SRCLIST = main.c help.c
+SRCLIST = main.c help.c reader.c
 SRC = $(addprefix ./src/, $(SRCLIST))
 
 OBJ = $(SRC:.c=.o)
@@ -8,7 +8,7 @@ OBJ = $(SRC:.c=.o)
 FLAGS = -g
 MLX = -I ./minilibx -L ./minilibx -l mlx -framework OpenGL -framework AppKit -framework OpenCL
 
-HEADERS = includes/fractol.h libft/libft.h minilibx/mlx.h
+HEADERS = includes/fractol.h libft/libft.h
 
 INCLUDES = -I includes/ -I libft/ -I minilibx/
 
@@ -19,7 +19,7 @@ all:
 	make $(NAME)
 	
 $(NAME): $(OBJ) $(HEADERS) $(LIBFT)
-	gcc -o $(NAME) $(OBJ) $(FLAGS) $(MLX) $(LIBFT) $(INCLUDES)
+	gcc -o $(NAME) $(OBJ) $(FLAGS) $(MLX) $(INCLUDES) $(LIBFT)
 
 %.o: %.c $(HEADERS) 
 	gcc -c $< $(FLAGS) -o $@ $(INCLUDES)
@@ -27,8 +27,9 @@ $(NAME): $(OBJ) $(HEADERS) $(LIBFT)
 clean:
 	rm -rf src/*.o
 	make clean -C libft
+
 fclean: clean
-	rm -rf fdf
+	rm -rf $(NAME)
 	make fclean -C libft
 
 dev:

@@ -6,17 +6,18 @@
 /*   By: llifeboa <llifeboa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/13 18:15:32 by llifeboa          #+#    #+#             */
-/*   Updated: 2019/10/15 08:01:03 by llifeboa         ###   ########.fr       */
+/*   Updated: 2019/10/16 07:43:01 by llifeboa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FRACTOL_H
 # define FRACTOL_H
 # define WG_SIZE 256
-# define WIDTH 1920
-# define HEIGHT 1020
+# define WIDTH 3200
+# define HEIGHT 1800
 # define MANDELBROTFILE "./src/mandelbrot.cl"
 
+# include "libft.h"
 # include <stdlib.h>
 # include <OpenCL/opencl.h>
 # include "mlx.h"
@@ -32,6 +33,7 @@ typedef struct		s_main
 	double				x_max;
 	double				y_min;
 	double				y_max;
+	int					max_iter;
 	cl_int				err;
     cl_uint				num_platforms;
     cl_platform_id		platform;
@@ -60,5 +62,5 @@ typedef struct		s_main
 void    malloc_check(void *data);
 void    exit_with_error(char *message);
 t_main  *init();
-
+char    *read_command(char *file);
 #endif
