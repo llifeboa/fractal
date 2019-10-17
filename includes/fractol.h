@@ -6,15 +6,15 @@
 /*   By: llifeboa <llifeboa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/13 18:15:32 by llifeboa          #+#    #+#             */
-/*   Updated: 2019/10/16 07:43:01 by llifeboa         ###   ########.fr       */
+/*   Updated: 2019/10/17 07:28:19 by llifeboa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FRACTOL_H
 # define FRACTOL_H
 # define WG_SIZE 256
-# define WIDTH 3200
-# define HEIGHT 1800
+# define WIDTH 1920
+# define HEIGHT 1080
 # define MANDELBROTFILE "./src/mandelbrot.cl"
 
 # include "libft.h"
@@ -55,6 +55,9 @@ typedef struct		s_main
 	int					color;
 	double				step;
 	double				mouse_delta;
+	short				shift_press;
+	double				x_param;
+	double				y_param;
 
 
 }					t_main;

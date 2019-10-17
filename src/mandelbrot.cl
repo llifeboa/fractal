@@ -3,25 +3,26 @@ __constant int color2[] = {6821858,6887394,6952930,7018466,7084002,7149538,72150
 double map(double current, double end, double new_start, double new_end) {
   return (current / end * (new_end - new_start) + new_start);
 }
-__kernel void render(__global int * out, double x_min, double x_max, double y_min, double y_max, int max_iter) {
+__kernel void render(__global int * out, double x_min, double x_max, double y_min, double y_max, int max_iter, double x_param, double y_param) {
+  max_iter = max_iter >> 1;
   int g = get_global_id(0);
-  int i = g / 3200;
-  int j = g % 3200;
-  double x_z = map(j, 3200, x_min, x_max);
-  double y_z = map(i, 1800, y_min, y_max);
-  double x = 0;
-  double y = 0;
+  int i = g / 1920;
+  int j = g % 1920;
+  double x_z = map(j, 1920, x_min, x_max);
+  double y_z = map(i, 1080, y_min, y_max);
+  double x = x_z;
+  double y = y_z;
   int iter = 0;
   double x_temp;
   while (x * x + y * y <= 4 && iter < max_iter) {
-	x_temp = x * x - y * y + x_z;
-	y = 2 * x * y + y_z;
+	x_temp = x * x - y * y + x_param;
+	y = 2 * x * y + y_param;
 	x = x_temp;
 	iter++;
   }
   if (iter != max_iter) {
-	out[i * 3200 + j] = color2[(iter % 256)];
+	out[i * 1920 + j] = color[(iter % 256)];
   } else {
-	out[i * 3200 + j] = 0;
+	out[i * 1920 + j] = 0;
   }
 }

@@ -6,7 +6,7 @@
 /*   By: llifeboa <llifeboa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/13 18:14:41 by llifeboa          #+#    #+#             */
-/*   Updated: 2019/10/16 08:07:52 by llifeboa         ###   ########.fr       */
+/*   Updated: 2019/10/17 07:47:25 by llifeboa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,11 @@ t_main  *init()
 {
 	t_main  *res;
 	res = (t_main*)malloc(sizeof(t_main));
-	res->x_min = -2.5;
-	res->x_max = 1;
+	res->x_min = -2;
+	res->x_max = 2;
 	res->y_min = -1;
 	res->y_max = 1;
-	res->max_iter = 256;
+	res->max_iter = 1024;
 	res->mouse_delta = (res->x_max - res->x_min) / (res->y_max - res->y_min);
 	res->step = 0.01f;
 	res->ptr = mlx_init();
@@ -79,8 +79,35 @@ t_main  *init()
 	res->image = mlx_new_image(res->ptr, WIDTH, HEIGHT);
 	res->image_data = mlx_get_data_addr(res->image, &(res->bpp), &(res->size_line), &(res->endian));
 	res->command = read_command("src/mandelbrot.cl");
+	res->shift_press = 0;
+	res->x_param = -0.8;
+	res->y_param = 0;
 	return res;
 
+}
+int mouse_move(int x, int y, void *param)
+{
+	t_main *main_data;
+
+	main_data = (t_main*)param;
+	if (main_data->shift_press == 1)
+	{
+		main_data->x_param = (double)x / ((double)WIDTH / 2) - 1;
+		main_data->y_param = (double)y / ((double)HEIGHT / 2) - 1;
+		mlx_clear_window(main_data->ptr,main_data->win);
+		main_data->err = clSetKernelArg(main_data->kernel, 1, sizeof(main_data->x_min), &(main_data->x_min));
+		main_data->err = clSetKernelArg(main_data->kernel, 2, sizeof(main_data->x_max), &(main_data->x_max));
+		main_data->err = clSetKernelArg(main_data->kernel, 3, sizeof(main_data->y_min), &(main_data->y_min));
+		main_data->err = clSetKernelArg(main_data->kernel, 4, sizeof(main_data->y_max), &(main_data->y_max));
+		main_data->err = clSetKernelArg(main_data->kernel, 5, sizeof(main_data->max_iter), &(main_data->max_iter));
+		main_data->err = clSetKernelArg(main_data->kernel, 6, sizeof(double), &(main_data->x_param));
+		main_data->err = clSetKernelArg(main_data->kernel, 7, sizeof(double), &(main_data->y_param));
+		main_data->err = clEnqueueNDRangeKernel(main_data->command_queue, main_data->kernel, 1, NULL, &(main_data->global_work_size), NULL, 0, NULL, NULL);
+		main_data->err = clEnqueueReadBuffer(main_data->command_queue, main_data->memobj, CL_TRUE, 0, main_data->memLenth * sizeof(cl_int), main_data->mem, 0, NULL, NULL);
+		clFinish(main_data->command_queue);
+		mlx_put_image_to_window(main_data->ptr, main_data->win, main_data->image, 0, 0);
+	}
+	
 }
 int mouse_press(int button, int x, int y, void *param)
 {
@@ -93,7 +120,6 @@ int mouse_press(int button, int x, int y, void *param)
 		
 		sign = button == 4 ? 1 : -1;
 		main_data->max_iter += sign;
-		main_data->max_iter *= 80;
 		main_data->step = (main_data->y_max - main_data->y_min) / 100 * 5;
 		main_data->x_min = main_data->x_min + (double)x / WIDTH * main_data->step * sign * main_data->mouse_delta;
 		main_data->x_max = main_data->x_max - (double)(WIDTH - x) / WIDTH * main_data->step * sign * main_data->mouse_delta;
@@ -105,6 +131,8 @@ int mouse_press(int button, int x, int y, void *param)
 		main_data->err = clSetKernelArg(main_data->kernel, 3, sizeof(main_data->y_min), &(main_data->y_min));
 		main_data->err = clSetKernelArg(main_data->kernel, 4, sizeof(main_data->y_max), &(main_data->y_max));
 		main_data->err = clSetKernelArg(main_data->kernel, 5, sizeof(main_data->max_iter), &(main_data->max_iter));
+		main_data->err = clSetKernelArg(main_data->kernel, 6, sizeof(double), &(main_data->x_param));
+		main_data->err = clSetKernelArg(main_data->kernel, 7, sizeof(double), &(main_data->y_param));
 		main_data->err = clEnqueueNDRangeKernel(main_data->command_queue, main_data->kernel, 1, NULL, &(main_data->global_work_size), NULL, 0, NULL, NULL);
 		main_data->err = clEnqueueReadBuffer(main_data->command_queue, main_data->memobj, CL_TRUE, 0, main_data->memLenth * sizeof(cl_int), main_data->mem, 0, NULL, NULL);
 		clFinish(main_data->command_queue);
@@ -119,15 +147,16 @@ int			keypress(int key, void *param)
 	t_main *main_data;
 	
 	main_data = (t_main *)param;
-	if (key == 69)
+	if (key == 257)
 		{
-			
+			main_data->shift_press = main_data->shift_press > 0 ? 0 : 1;
 		}
 }
 
 void		controls(t_main *main_data)
 {
-	mlx_hook(main_data->win, 2, 0, keypress, main_data);
+	mlx_hook(main_data->win, 3, 0, keypress, main_data);
+	mlx_hook(main_data->win, 6, 0, mouse_move, main_data);
 	mlx_mouse_hook(main_data->win, mouse_press, main_data);
 }
 
@@ -161,6 +190,8 @@ int main(int argc, char const *argv[])
 	main_data->err = clSetKernelArg(main_data->kernel, 3, sizeof(main_data->y_min), &(main_data->y_min));
 	main_data->err = clSetKernelArg(main_data->kernel, 4, sizeof(main_data->y_max), &(main_data->y_max));
 	main_data->err = clSetKernelArg(main_data->kernel, 5, sizeof(main_data->max_iter), &(main_data->max_iter));
+	main_data->err = clSetKernelArg(main_data->kernel, 6, sizeof(double), &(main_data->x_param));
+	main_data->err = clSetKernelArg(main_data->kernel, 7, sizeof(double), &(main_data->y_param));
 	
 	main_data->global_work_size = WIDTH * HEIGHT;
 
