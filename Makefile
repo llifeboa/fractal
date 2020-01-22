@@ -5,7 +5,7 @@ SRC = $(addprefix ./src/, $(SRCLIST))
 
 OBJ = $(SRC:.c=.o)
 
-FLAGS = -Wall -Wextra -Werror -g
+FLAGS = -Wall -Wextra -Werror
 MLX = -I ./minilibx -L ./minilibx -l mlx -framework OpenGL -framework AppKit -framework OpenCL
 
 HEADERS = includes/fractol.h libft/libft.h

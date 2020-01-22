@@ -8,7 +8,7 @@ $(NAME): $(OBJECTS) libft.h
 	ar rc $(NAME) $(OBJECTS) libft.h
 	ranlib $(NAME)
 %.o: %.c libft.h
-	gcc -c $< -Wall -Wextra -Werror -g -I libft.h
+	gcc -c $< -Wall -Wextra -Werror -I libft.h
 clean:
 	rm -f *.o
 
