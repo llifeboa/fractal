@@ -1,11 +1,11 @@
 NAME = fractol
 
-SRCLIST = main.c help.c reader.c
+SRCLIST = main.c help.c reader.c settings.c
 SRC = $(addprefix ./src/, $(SRCLIST))
 
 OBJ = $(SRC:.c=.o)
 
-FLAGS = -g
+FLAGS = -Wall -Wextra -Werror -g
 MLX = -I ./minilibx -L ./minilibx -l mlx -framework OpenGL -framework AppKit -framework OpenCL
 
 HEADERS = includes/fractol.h libft/libft.h
